@@ -1,6 +1,10 @@
 package com.luoyuanhang.dbconnect;
 
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.*;
 
 /**
@@ -54,10 +58,12 @@ public class DBConnector {
             //Output to Console
             System.out.println("DATABASE: CONNECT SUCCESS!");
             log += "DATABASE: CONNECT SUCCESS! \n";
+            addLog("DATABASE: CONNECT SUCCESS!\n");
         }catch(Exception exception){
             exception.printStackTrace();
             System.out.println("DATABASE: CONNECT FAIL!");
             log += "DATABASE: CONNECT FAIL! \n";
+            addLog("DATABASE: CONNECT FAIL!\n");
         }finally {
             return connection;
         }
@@ -78,12 +84,13 @@ public class DBConnector {
                 resultSet = null;
                 System.out.println("DATABASE: CLOSE RESULT SET SUCCESS!");
                 log += "DATABASE: CLOSE RESULT SET SUCCESS! \n";
-
+                addLog("DATABASE: CLOSE RESULT SET SUCCESS!\n");
             }catch (SQLException e){
                 e.printStackTrace();
                 isClose = false;
                 System.out.println("DATABASE: CLOSE RESULT SET FAIL!");
                 log += "DATABASE: CLOSE RESULT SET FAIL! \n";
+                addLog("DATABASE: CLOSE RESULT SET FAIL!\n");
             }
         }
         //try to close prepared statement
@@ -93,11 +100,13 @@ public class DBConnector {
                 preparedStatement = null;
                 System.out.println("DATABASE: CLOSE PREPARED STATEMENT SUCCESS!");
                 log += "DATABASE: CLOSE PREPARED STATEMENT SUCCESS! \n";
+                addLog("DATABASE: CLOSE PREPARED STATEMENT SUCCESS!\n");
             }catch (SQLException e){
                 isClose = false;
                 e.printStackTrace();
                 System.out.println("DATABASE: CLOSE PREPARED STATEMENT SET FAIL!");
                 log += "DATABASE: CLOSE PREPARED STATEMENT SET FAIL! \n";
+                addLog("DATABASE: CLOSE PREPARED STATEMENT SET FAIL!\n");
             }
         }
         //try to close connection
@@ -107,15 +116,38 @@ public class DBConnector {
                 connection = null;
                 System.out.println("DATABASE: CLOSE CONNECTION SUCCESS!");
                 log += "DATABASE: CLOSE CONNECTION SUCCESS! \n";
+                addLog("DATABASE: CLOSE CONNECTION SUCCESS! \n");
             } catch (SQLException e) {
                 isClose = false;
                 e.printStackTrace();
                 System.out.println("DATABASE: CLOSE CONNECTION FAIL!");
                 log += "DATABASE: CLOSE CONNECTION FAIL! \n";
+                addLog("DATABASE: CLOSE CONNECTION FAIL! \n");
             }
         }
+        addLog("DATABASE: DISCONNECT SUCCESS");
         return  isClose;
     }
+
+    /**
+     * Output Log to file "DB_LOG.txt"
+     * @param log
+     */
+    private static void addLog(String log){
+        try{
+            File file = new File("DB_LOG.txt");
+            if(!file.exists()){
+                file.createNewFile();
+            }
+            FileWriter fileWriter = new FileWriter(file.getName(),true);
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+            bufferedWriter.write(log);
+            bufferedWriter.close();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
 
     /**
      * Get logs
