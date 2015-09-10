@@ -130,10 +130,51 @@ public class DBConnector {
     }
 
     /**
-     * Output Log to file "DB_LOG.txt"
-     * @param log
+     * Execute query
+     *
+     * @param sql
+     * @return result set
      */
-    private static void addLog(String log){
+    public ResultSet query(String sql){
+        try{
+            preparedStatement = connection.prepareStatement(sql);
+            resultSet = preparedStatement.executeQuery();
+            addLog("DATABASE: QUERY <" + sql + "> SUCCESS!\n");
+        }catch (SQLException e){
+            e.printStackTrace();
+            addLog("DATABASE: QUERY FAIL!\n");
+        }finally {
+            return resultSet;
+        }
+    }
+
+    /**
+     * Execute update
+     *
+     * @param sql
+     * @return count
+     */
+    public int update(String sql){
+        try{
+            preparedStatement = connection.prepareStatement(sql);
+            count = preparedStatement.executeUpdate();
+            addLog("DATABASE: UPDATE SUCCESS!\n");
+        }catch(SQLException e){
+            e.printStackTrace();
+            addLog("DATABASE: UPDATE FAIL!\n");
+        }
+        return  count;
+    }
+
+
+
+
+
+    /**
+     * Output Log to file "DB_LOG.txt"
+     * @param logs
+     */
+    private static void addLog(String logs){
         try{
             File file = new File("DB_LOG.txt");
             if(!file.exists()){
@@ -141,7 +182,7 @@ public class DBConnector {
             }
             FileWriter fileWriter = new FileWriter(file.getName(),true);
             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-            bufferedWriter.write(log);
+            bufferedWriter.write(logs);
             bufferedWriter.close();
         }catch (IOException e){
             e.printStackTrace();

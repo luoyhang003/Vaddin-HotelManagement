@@ -21,7 +21,8 @@ public class MainPage extends UI {
         DBConnector connector = new DBConnector();
         //disconnect database
         connector.close();
-        String log = connector.getLog();
+        String log;
+        log = connector.getLog();
 
         VerticalLayout layout = new VerticalLayout();
         setContent(layout);
