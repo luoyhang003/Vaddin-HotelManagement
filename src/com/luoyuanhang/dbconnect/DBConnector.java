@@ -158,7 +158,7 @@ public class DBConnector {
         try{
             preparedStatement = connection.prepareStatement(sql);
             count = preparedStatement.executeUpdate();
-            addLog("DATABASE: UPDATE SUCCESS!\n");
+            addLog("DATABASE: UPDATE <" + sql + "> SUCCESS!\n");
         }catch(SQLException e){
             e.printStackTrace();
             addLog("DATABASE: UPDATE FAIL!\n");

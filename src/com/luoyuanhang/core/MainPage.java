@@ -13,15 +13,27 @@ import java.sql.SQLException;
  * Created by jason on 15/9/10.
  */
 
+/*=================TEST INSTANCE=====================*/
+//test update
 
+public class MainPage extends UI{
+    protected  void init (VaadinRequest request){
+        VerticalLayout layout = new VerticalLayout();
+        setContent(layout);
 
+        DBConnector connector = new DBConnector();
+
+        String sql = "INSERT INTO teacher values('3','D','400')";
+        connector.update(sql);
+    }
+}
 
 
 
 
 
 /*=================TEST INSTANCE=====================*/
-//test query and update
+//test query
 
 //public class MainPage extends UI {
 //
