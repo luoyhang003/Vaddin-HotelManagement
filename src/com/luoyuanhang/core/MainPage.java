@@ -1,32 +1,52 @@
 package com.luoyuanhang.core;
 
+import com.luoyuanhang.core.com.luoyuanhang.utils.components.PanelCreator;
 import com.luoyuanhang.dbconnect.DBConnector;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
  * Created by jason on 15/9/10.
+ *
+ * The Main Page of the Project
+ *
+ *
  */
+
+
+public class MainPage extends UI{
+    protected void init(VaadinRequest request){
+        VerticalLayout layout = new VerticalLayout();
+        Window window = new Window();
+
+        Panel login = PanelCreator.createLoginPanel();
+        login.setWidth("260px");
+        login.setHeight("100px");
+        layout.addComponent(login);
+        setContent(layout);
+    }
+}
+
+
+
 
 /*=================TEST INSTANCE=====================*/
 //test update
 
-public class MainPage extends UI{
-    protected  void init (VaadinRequest request){
-        VerticalLayout layout = new VerticalLayout();
-        setContent(layout);
-
-        DBConnector connector = new DBConnector();
-
-        String sql = "INSERT INTO teacher values('3','D','400')";
-        connector.update(sql);
-    }
-}
+//public class MainPage extends UI{
+//    protected  void init (VaadinRequest request){
+//        VerticalLayout layout = new VerticalLayout();
+//        setContent(layout);
+//
+//        DBConnector connector = new DBConnector();
+//
+//        String sql = "INSERT INTO teacher values('3','D','400')";
+//        connector.update(sql);
+//    }
+//}
 
 
 
