@@ -166,10 +166,6 @@ public class DBConnector {
         return  count;
     }
 
-
-
-
-
     /**
      * Output Log to file "DB_LOG.txt"
      * @param logs
@@ -198,5 +194,27 @@ public class DBConnector {
         return  log;
     }
 
+
+    public static void main(String args[]){
+        String id = "";
+        String name = "";
+        String salary = "";
+
+        DBConnector con = new DBConnector();
+
+        ResultSet resultSet = con.query("SELECT * FROM teacher");
+        try {
+            while(resultSet.next()){
+                id += resultSet.getString("id")+" ";
+                name += resultSet.getString("name")+" ";
+                salary += resultSet.getInt("salary")+" ";
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println(id);
+
+    }
 
 }
