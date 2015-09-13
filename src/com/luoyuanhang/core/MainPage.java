@@ -2,6 +2,8 @@ package com.luoyuanhang.core;
 
 import com.luoyuanhang.core.com.luoyuanhang.utils.components.PanelCreator;
 import com.luoyuanhang.dbconnect.DBConnector;
+import com.vaadin.annotations.Theme;
+import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.*;
 
@@ -16,17 +18,14 @@ import java.sql.SQLException;
  *
  */
 
-
 public class MainPage extends UI{
     protected void init(VaadinRequest request){
-        VerticalLayout layout = new VerticalLayout();
-        Window window = new Window();
+        VerticalLayout layout = PanelCreator.createLoginWindow();
 
-        Panel login = PanelCreator.createLoginPanel();
-        login.setWidth("260px");
-        login.setHeight("100px");
-        layout.addComponent(login);
+
+
         setContent(layout);
+
     }
 }
 
