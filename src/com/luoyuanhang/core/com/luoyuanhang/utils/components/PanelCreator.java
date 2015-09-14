@@ -279,11 +279,58 @@ public class PanelCreator {
     }
 
 
-    public static TabSheet createUserTab(){
+    /**
+     * 用户登录系统
+     *
+     * @return Tabsheet
+     */
+    public static TabSheet createUserTab(DBConnector connector, String id){
         TabSheet tabSheet = new TabSheet();
+
+        tabSheet.setWidth(Page.getCurrent().getBrowserWindowWidth()+"");
+        tabSheet.setHeight(Page.getCurrent().getBrowserWindowHeight()+"");
 
         tabSheet.setSizeFull();
 
+        VerticalLayout info = new VerticalLayout();
+
+        String SQL_info = "SELECT cid,cname,csex,cphone,vip FROM customer WHERE cid = '"+id+"'";
+
+        info.addComponent(new Label("HELLO"));
+
+        try {
+
+            ResultSet resultSet_info = connector.query(SQL_info);
+
+            if (resultSet_info.next()) {
+
+                String cid = resultSet_info.getString("cid");
+                String cname = resultSet_info.getString("cname");
+                String csex = resultSet_info.getString("csex");
+                String ctel = resultSet_info.getString("cphone");
+                String cvip = resultSet_info.getString("vip");
+
+
+                Label label_cid = new Label("帐号:   "+cid);
+                Label label_cname = new Label("姓名:   "+cname);
+                Label label_csex = new Label("性别:   "+(csex.equals("0")?"男":"女"));
+                Label label_ctel = new Label("手机:   "+ctel);
+                Label label_vip = new Label("会员:   "+ (cvip.equals("00000")?"普通会员":"VIP 会员"));
+
+                info.addComponent(label_cid);
+                info.addComponent(label_cname);
+                info.addComponent(label_csex);
+                info.addComponent(label_ctel);
+                info.addComponent(label_vip);
+
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+//            Notification notification = new Notification("ERROR");
+//            notification.show(Page.getCurrent());
+        }
+
+        tabSheet.addTab(info,"个人信息");
 
 
         return tabSheet;
