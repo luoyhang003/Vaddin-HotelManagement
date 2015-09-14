@@ -92,17 +92,15 @@ public class PanelCreator {
 
 
                 try{
-                    String sql1 = "SELECT cid FROM customer where cid = '" + username +
-                            "'and cpassword='"+password+"';";
+                    String sql1 = "SELECT eid FROM employee where eid = '" + username +
+                            "'and epassword='"+password+"';";
                     ResultSet resultSet1 = connection.query(sql1);
                     if(resultSet1.next()){
                         flag = 1;
                     }
-                }catch (SQLException e){
-                    e.printStackTrace();;
-                }
-                if(flag == 0) {
-                    try {
+
+                    if(flag == 0) {
+
                         String sql = "SELECT cid FROM customer where cid = '" + username +
                                 "'and cpassword='" + password + "';";
 
@@ -117,9 +115,12 @@ public class PanelCreator {
                             notification.show(Page.getCurrent());
 
                         }
-                    } catch (SQLException e) {
-                        e.printStackTrace();
+
+
                     }
+
+               }catch (SQLException e){
+                    e.printStackTrace();
                 }
 
                 if(flag == 0){
