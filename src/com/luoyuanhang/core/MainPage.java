@@ -20,7 +20,9 @@ import java.sql.SQLException;
 
 public class MainPage extends UI{
     protected void init(VaadinRequest request){
-        VerticalLayout layout = PanelCreator.createLoginWindow();
+        DBConnector connector = new DBConnector();
+
+        VerticalLayout layout = PanelCreator.createLoginWindow(connector);
 
 
 

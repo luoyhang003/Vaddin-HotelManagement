@@ -1,9 +1,14 @@
 package com.luoyuanhang.core.com.luoyuanhang.utils.components;
 
+import com.luoyuanhang.dbconnect.DBConnector;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.Page;
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.*;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 
 /**
@@ -54,9 +59,9 @@ public class PanelCreator {
         return login;
     }
 
-    public static VerticalLayout createLoginWindow(){
+    public static VerticalLayout createLoginWindow(final DBConnector connection){
 
-        VerticalLayout layout = new VerticalLayout();
+        final VerticalLayout layout = new VerticalLayout();
 
         layout.setHeight(Page.getCurrent().getBrowserWindowHeight()+"");
         layout.setWidth(Page.getCurrent().getBrowserWindowWidth()+"");
@@ -80,12 +85,52 @@ public class PanelCreator {
         Button login = new Button("登录", new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent clickEvent) {
+                int flag = 0;
+
                 String username = textfield_username.getValue();
                 String password = passwordField.getValue();
 
 
+                try{
+                    String sql1 = "SELECT cid FROM customer where cid = '" + username +
+                            "'and cpassword='"+password+"';";
+                    ResultSet resultSet1 = connection.query(sql1);
+                    if(resultSet1.next()){
+                        flag = 1;
+                    }
+                }catch (SQLException e){
+                    e.printStackTrace();;
+                }
+                if(flag == 0) {
+                    try {
+                        String sql = "SELECT cid FROM customer where cid = '" + username +
+                                "'and cpassword='" + password + "';";
 
+                        ResultSet resultSet = connection.query(sql);
 
+                        if (!resultSet.next()) {
+                            Notification notification = new Notification("登录错误", "请先注册或者重新输入！");
+                            notification.show(Page.getCurrent());
+
+                        } else {
+                            Notification notification = new Notification("SUCCESS");
+                            notification.show(Page.getCurrent());
+
+                        }
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if(flag == 0){
+                    Notification notification = new Notification("用户身份登录！");
+                    notification.show(Page.getCurrent());
+                }
+
+                if(flag == 1){
+                    Notification notification = new Notification("员工身份登录！");
+                    notification.show(Page.getCurrent());
+                }
 
             }
         });
@@ -95,26 +140,52 @@ public class PanelCreator {
         Button register = new Button("注册", new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent clickEvent) {
-                String username = "";
-                String password = "";
-                String name = "";
-                int sex = 0;
-                String tel = "";
+//                final String username = "";
+//                String password = "";
+//                String name = "";
+//                int sex = 0;
+//                String tel = "";
 
                 Window window = new Window("注册");
 
                 FormLayout formLayout = new FormLayout();
                 formLayout.setSizeUndefined();
 
-                TextField username_tf = new TextField("*帐号：");
-                PasswordField password_pf = new PasswordField("*密码：");
-                TextField name_tf = new TextField("*姓名：");
-                OptionGroup sex_og = new OptionGroup("*性别：");
-                TextField tel_tf = new TextField("*电话：");
+                final TextField username_tf = new TextField("*帐号：");
+                final PasswordField password_pf = new PasswordField("*密码：");
+                final TextField name_tf = new TextField("*姓名：");
+                final OptionGroup sex_og = new OptionGroup("*性别：");
+                sex_og.setNullSelectionAllowed(false);
+                sex_og.addItem(1);
+                sex_og.setItemCaption(1,"男");
+                sex_og.addItem(2);
+                sex_og.setItemCaption(2,"女");
+                final TextField tel_tf = new TextField("*电话：");
                 Button submit_btn = new Button("注册", new Button.ClickListener() {
                     @Override
                     public void buttonClick(Button.ClickEvent clickEvent) {
+                        String username = username_tf.getValue();
+                        String password = password_pf.getValue();
+                        String name = name_tf.getValue();
+                        char sex = '0';
+                        if(sex_og.getValue().equals("2")){
+                            sex = '1';
+                        }
+                        String tel = tel_tf.getValue();
+                        String vip = "00000";
 
+                        if(!(username!=null&&username.equals("")||password!=null&&password.equals("")||
+                                name!=null&&name.equals("")||tel!=null&&tel.equals(""))) {
+                            String sql = "INSERT INTO customer (cid,cname,csex,cphone,vip,cpassword) VALUES('" +
+                                    username + "','" + name + "','" +
+                                    sex + "','" + tel + "','" + vip + "','"+password+"');";
+                            connection.update(sql);
+                            Notification notification = new Notification("注册成功","请登录！");
+                            notification.show(Page.getCurrent());
+                        }else{
+                            Notification notification = new Notification("请把信息填写完整！");
+                            notification.show(Page.getCurrent());
+                        }
                     }
                 });
 
@@ -134,6 +205,8 @@ public class PanelCreator {
                         200);
 
                 UI.getCurrent().addWindow(window);
+
+
 
             }
         });
@@ -201,5 +274,17 @@ public class PanelCreator {
 
         return layout;
 
+
+    }
+
+
+    public static TabSheet createUserTab(){
+        TabSheet tabSheet = new TabSheet();
+
+        tabSheet.setSizeFull();
+
+
+
+        return tabSheet;
     }
 }

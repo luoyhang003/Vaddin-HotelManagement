@@ -21,7 +21,7 @@ import java.sql.*;
  */
 public class DBConnector {
     //Database URL
-    public static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/example";
+    public static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/e1?useUnicode=true&characterEncoding=utf8";
     //Driver Name
     public static final String DB_DRIVER = "com.mysql.jdbc.Driver";
     //Database Username
