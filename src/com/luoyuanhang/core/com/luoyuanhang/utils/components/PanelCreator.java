@@ -2,8 +2,7 @@ package com.luoyuanhang.core.com.luoyuanhang.utils.components;
 
 import com.luoyuanhang.dbconnect.DBConnector;
 import com.vaadin.event.MouseEvents;
-import com.vaadin.server.Page;
-import com.vaadin.server.Sizeable;
+import com.vaadin.server.*;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Image;
@@ -13,7 +12,8 @@ import com.vaadin.server.Sizeable.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Date;
+import java.util.*;
+import java.util.Calendar;
 
 
 /**
@@ -417,6 +417,10 @@ public class PanelCreator {
         tabSheet.addTab(record,"个人记录");
 
 
+
+
+
+
         return tabSheet;
     }
 
@@ -507,20 +511,37 @@ public class PanelCreator {
                     Label roomtype_label = new Label("房间类型： "+bookinfo_type);
                     Label roomprice_label = new Label("房间价格： "+bookinfo_price);
 
-                    PopupDateField book_date = new PopupDateField("日期：");
+                    final PopupDateField book_date = new PopupDateField("日期：");
 
-                    Date date = book_date.getValue();
+
+//                    String inDate = ""+date.getYear() + date.getMonth() + date.getDate();
+//                    Notification n = new Notification(date.toString());
+//                    n.show(Page.getCurrent());
 
                     Button book_btn = new Button("确认预订", new Button.ClickListener() {
                         @Override
                         public void buttonClick(Button.ClickEvent clickEvent) {
                             String cid = userID;
-                            String SQL_book_customer = "INSERT INTO book(rid,cid) values('"+roomId+"','"+
-                                    cid + "')";
+
+                            Date date = book_date.getValue();
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.setTime(date);
+
+                            String inDate = ""+calendar.get(Calendar.YEAR)+calendar.get(Calendar.MONTH)+
+                                    calendar.get(Calendar.DATE);
+
+                            String SQL_book_customer = "INSERT INTO book(rid,cid,indate) values('"+roomId+"','"+
+                                    cid +"','"+inDate+ "')";
                             connector.update(SQL_book_customer);
 
                             String SQL_setroomstate = "UPDATE room SET state='1' WHERE rid='"+roomId+"'";
                             connector.update(SQL_setroomstate);
+
+                            Notification notification_book_success = new Notification("恭喜您！","预订成功");
+                            notification_book_success.show(Page.getCurrent());
+
+                            Page.getCurrent().reload();
+
 
 
 
