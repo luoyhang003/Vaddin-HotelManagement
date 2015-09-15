@@ -18,14 +18,27 @@ import java.sql.SQLException;
  *
  */
 
-public class MainPage extends UI{
-    protected void init(VaadinRequest request){
-        DBConnector connector = new DBConnector();
 
+public class  MainPage extends UI{
+    protected void init(VaadinRequest request){
+
+    }
+}
+
+
+
+
+/*=================TEST INSTANCE=====================*/
+//test Login Panel & User info
+
+//public class MainPage extends UI{
+//    protected void init(VaadinRequest request){
+//        DBConnector connector = new DBConnector();
+//
 //        VerticalLayout layout = PanelCreator.createLoginWindow(connector);
 
-        VerticalLayout layout = new VerticalLayout();
-        layout.addComponent(PanelCreator.createUserTab(connector,"11116"));
+//        VerticalLayout layout = new VerticalLayout();
+//        layout.addComponent(PanelCreator.createUserTab(connector,"11116"));
 
 //        VerticalLayout info = new VerticalLayout();
 //
@@ -68,11 +81,11 @@ public class MainPage extends UI{
 //            Notification notification = new Notification("ERROR");
 //            notification.show(Page.getCurrent());
 //        }
-
-        setContent(layout);
-
-    }
-}
+//
+//        setContent(layout);
+//
+//    }
+//}
 
 
 

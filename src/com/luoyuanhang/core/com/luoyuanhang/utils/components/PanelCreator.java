@@ -59,6 +59,12 @@ public class PanelCreator {
         return login;
     }
 
+    /**
+     * Main Login Page
+     *
+     * @param connection
+     * @return
+     */
     public static VerticalLayout createLoginWindow(final DBConnector connection){
 
         final VerticalLayout layout = new VerticalLayout();
@@ -177,8 +183,8 @@ public class PanelCreator {
 
                         if(!(username!=null&&username.equals("")||password!=null&&password.equals("")||
                                 name!=null&&name.equals("")||tel!=null&&tel.equals(""))) {
-                            String sql = "INSERT INTO customer (cid,cname,csex,cphone,vip,cpassword) VALUES('" +
-                                    username + "','" + name + "','" +
+                            String sql = "INSERT INTO customer (cid,cname,csex,cphone,vip,cpassword) VALUES('"
+                                    + username + "','" + name + "','" +
                                     sex + "','" + tel + "','" + vip + "','"+password+"');";
                             connection.update(sql);
                             Notification notification = new Notification("注册成功","请登录！");
@@ -296,7 +302,7 @@ public class PanelCreator {
 
         String SQL_info = "SELECT cid,cname,csex,cphone,vip FROM customer WHERE cid = '"+id+"'";
 
-        info.addComponent(new Label("HELLO"));
+        info.addComponent(new Label("您好，"));
 
         try {
 
@@ -330,9 +336,22 @@ public class PanelCreator {
 //            notification.show(Page.getCurrent());
         }
 
+        VerticalLayout roominfo = new VerticalLayout();
+
+
+
+        VerticalLayout record = new VerticalLayout();
+
+
+
+
         tabSheet.addTab(info,"个人信息");
+        tabSheet.addTab(roominfo,"房间信息");
+        tabSheet.addTab(record,"个人记录");
 
 
         return tabSheet;
     }
+
+    private static Panel
 }
