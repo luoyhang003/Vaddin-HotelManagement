@@ -13,6 +13,7 @@ import com.vaadin.server.Sizeable.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 
 
 /**
@@ -419,13 +420,15 @@ public class PanelCreator {
         return tabSheet;
     }
 
-    public static Panel createRoomInfo(String roomId,String type,String state,String price,DBConnector connector,
-                                       String userID){
+    public static Panel createRoomInfo(final String roomId,String type,String state,String price,
+                                       final DBConnector connector, final String userID){
         Panel info = new Panel(roomId);
         info.setHeight(100.0f, Unit.PERCENTAGE);
+        info.setImmediate(true);
 
         VerticalLayout roomInfoLayout = new VerticalLayout();
         roomInfoLayout.setMargin(true);
+        roomInfoLayout.setImmediate(true);
 
         if(state.equals("0"))
             state = "空闲";
@@ -462,15 +465,81 @@ public class PanelCreator {
             info.addClickListener(new MouseEvents.ClickListener() {
                 @Override
                 public void click(MouseEvents.ClickEvent clickEvent) {
-                    Notification notification = new Notification("CLICKED");
-                    notification.show(Page.getCurrent());
+                    String SQL_book_info = "SELECT * FROM room WHERE rid='"+roomId+"'";
 
-                    Window book = new Window("预订");
+                    ResultSet resultSet_book_info = connector.query(SQL_book_info);
+                    String bookinfo_type = "";
+                    String bookinfo_price = "";
+
+                    try {
+                        if(resultSet_book_info.next()){
+                            bookinfo_type = resultSet_book_info.getString("type");
+                            bookinfo_price = resultSet_book_info.getString("price");
+                        }
+
+
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+
+                    switch (bookinfo_type){
+                        case "0":
+                            bookinfo_type = "单人间";
+                            break;
+                        case "1":
+                            bookinfo_type = "标准间";
+                            break;
+                        case "2":
+                            bookinfo_type = "豪华间";
+                            break;
+                        case "3":
+                            bookinfo_type = "商务间";
+                            break;
+                    }
+
+                    Window book = new Window("预订: " + roomId);
+                    book.setImmediate(true);
 
                     VerticalLayout bookLayout = new VerticalLayout();
+                    bookLayout.setMargin(true);
+
+                    Label roomid_label = new Label("房间号： "+roomId);
+                    Label roomtype_label = new Label("房间类型： "+bookinfo_type);
+                    Label roomprice_label = new Label("房间价格： "+bookinfo_price);
+
+                    PopupDateField book_date = new PopupDateField("日期：");
+
+                    Date date = book_date.getValue();
+
+                    Button book_btn = new Button("确认预订", new Button.ClickListener() {
+                        @Override
+                        public void buttonClick(Button.ClickEvent clickEvent) {
+                            String cid = userID;
+                            String SQL_book_customer = "INSERT INTO book(rid,cid) values('"+roomId+"','"+
+                                    cid + "')";
+                            connector.update(SQL_book_customer);
+
+                            String SQL_setroomstate = "UPDATE room SET state='1' WHERE rid='"+roomId+"'";
+                            connector.update(SQL_setroomstate);
+
+
+
+                        }
+                    });
+                    book_btn.setImmediate(true);
+
+                    bookLayout.addComponent(roomid_label);
+                    bookLayout.addComponent(roomtype_label);
+                    bookLayout.addComponent(roomprice_label);
+                    bookLayout.addComponent(book_date);
+                    bookLayout.addComponent(book_btn);
+
 
 
                     book.setContent(bookLayout);
+
+
+
 
                     UI.getCurrent().addWindow(book);
 
