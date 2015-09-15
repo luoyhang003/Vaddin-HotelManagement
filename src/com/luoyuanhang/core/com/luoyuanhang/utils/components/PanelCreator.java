@@ -467,6 +467,10 @@ public class PanelCreator {
 
                     Window book = new Window("预订");
 
+                    VerticalLayout bookLayout = new VerticalLayout();
+
+
+                    book.setContent(bookLayout);
 
                     UI.getCurrent().addWindow(book);
 
