@@ -2,13 +2,9 @@ package com.luoyuanhang.core;
 
 import com.luoyuanhang.core.com.luoyuanhang.utils.components.PanelCreator;
 import com.luoyuanhang.dbconnect.DBConnector;
-import com.vaadin.annotations.Theme;
-import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.*;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * Created by jason on 15/9/10.
@@ -19,11 +15,60 @@ import java.sql.SQLException;
  */
 
 
-public class  MainPage extends UI{
+public class MainPage extends UI{
     protected void init(VaadinRequest request){
+        DBConnector connector = new DBConnector();
+
+        VerticalLayout layout = new VerticalLayout();
+
+        TabSheet tabSheet = PanelCreator.createUserTab(connector,"11116");
+
+        layout.addComponent(tabSheet);
+
+        setContent(layout);
 
     }
 }
+
+/*=================TEST INSTANCE=====================*/
+//test room info panel
+
+//public class  MainPage extends UI{
+//    protected void init(VaadinRequest request){
+//        DBConnector connector = new DBConnector();
+//
+//        VerticalLayout layout = new VerticalLayout();
+//
+//        Label label = new Label("第1层：");
+//
+//        HorizontalLayout list = new HorizontalLayout();
+//        list.setMargin(true);
+//
+//        for(int i = 0; i < 5; i++){
+//            Panel room = PanelCreator.createRoomInfo("810"+i,"0","0","100",connector);
+//            list.addComponent(room);
+//        }
+//
+//        layout.addComponent(label);
+//        layout.addComponent(list);
+////        Panel room = PanelCreator.createRoomInfo("8101","单人间","空闲","100");
+////        room.setSizeFull();
+//        Label label1 = new Label("第2层：");
+//
+//        HorizontalLayout list1 = new HorizontalLayout();
+//        list1.setMargin(true);
+//
+//        for(int i = 0; i < 5; i++){
+//            Panel room = PanelCreator.createRoomInfo("820"+i,"1","1","120",connector);
+//            list1.addComponent(room);
+//        }
+//
+//        layout.addComponent(label1);
+//        layout.addComponent(list1);
+//
+//        setContent(layout);
+//    }
+//}
 
 
 

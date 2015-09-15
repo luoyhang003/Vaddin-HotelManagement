@@ -1,12 +1,16 @@
 package com.luoyuanhang.core.com.luoyuanhang.utils.components;
 
 import com.luoyuanhang.dbconnect.DBConnector;
-import com.vaadin.server.ExternalResource;
+import com.vaadin.event.MouseEvents;
 import com.vaadin.server.Page;
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.*;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Image;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Panel;
+import com.vaadin.server.Sizeable.*;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -74,7 +78,7 @@ public class PanelCreator {
 
 
         Image logo = new Image();
-        logo.setHeight(65, Sizeable.Unit.PERCENTAGE);
+        logo.setHeight(65, Unit.PERCENTAGE);
 
         Label space = new Label();
         space.setWidth("500px");
@@ -338,6 +342,68 @@ public class PanelCreator {
 
         VerticalLayout roominfo = new VerticalLayout();
 
+        for(int i = 1; i <= 5; i++){
+            Label floor = new Label("第 " + i +" 层：");
+
+            HorizontalLayout list = new HorizontalLayout();
+            for(int j = 0; j < 5; j++){
+                String rid = "8"+i+"0"+j;
+                String rtype = "";
+                String rstate = "";
+                String rprice = "";
+
+                String SQL_roomInfo = "SELECT * FROM room WHERE rid = '"+rid+"'";
+
+                try{
+                    ResultSet resultSet_roominfo = connector.query(SQL_roomInfo);
+                    if(resultSet_roominfo.next()){
+                        rtype = resultSet_roominfo.getString("type");
+                        rstate = resultSet_roominfo.getString("state");
+                        rprice = resultSet_roominfo.getString("price");
+                    }
+                }catch (SQLException e){
+                    e.printStackTrace();
+                }
+
+                Panel roominfoPanel = createRoomInfo(rid,rtype,rstate,rprice,connector,id);
+
+                list.addComponent(roominfoPanel);
+
+
+            }
+
+            HorizontalLayout list1 = new HorizontalLayout();
+            for(int j = 5; j < 10; j++){
+                String rid = "8"+i+"0"+j;
+                String rtype = "";
+                String rstate = "";
+                String rprice = "";
+
+                String SQL_roomInfo = "SELECT * FROM room WHERE rid = '"+rid+"'";
+
+                try{
+                    ResultSet resultSet_roominfo = connector.query(SQL_roomInfo);
+                    if(resultSet_roominfo.next()){
+                        rtype = resultSet_roominfo.getString("type");
+                        rstate = resultSet_roominfo.getString("state");
+                        rprice = resultSet_roominfo.getString("price");
+                    }
+                }catch (SQLException e){
+                    e.printStackTrace();
+                }
+
+                Panel roominfoPanel = createRoomInfo(rid,rtype,rstate,rprice,connector,id);
+
+                list1.addComponent(roominfoPanel);
+
+            }
+
+            roominfo.addComponent(floor);
+            roominfo.addComponent(list);
+            roominfo.addComponent(list1);
+
+        }
+
 
 
         VerticalLayout record = new VerticalLayout();
@@ -353,5 +419,64 @@ public class PanelCreator {
         return tabSheet;
     }
 
-    private static Panel
+    public static Panel createRoomInfo(String roomId,String type,String state,String price,DBConnector connector,
+                                       String userID){
+        Panel info = new Panel(roomId);
+        info.setHeight(100.0f, Unit.PERCENTAGE);
+
+        VerticalLayout roomInfoLayout = new VerticalLayout();
+        roomInfoLayout.setMargin(true);
+
+        if(state.equals("0"))
+            state = "空闲";
+        else{
+            state = "已满";
+        }
+
+        if(type.equals("0")){
+            type = "单人间";
+        }
+        else if (type.equals("1")){
+            type = "标准间";
+        }
+        else if(type.equals("2")){
+            type = "豪华间";
+        }
+        else{
+            type = "商务间";
+        }
+
+        Label roomType =new Label("房间类型："+ type);
+        roomType.setHeight(33.3f, Unit.PIXELS);
+        Label roomState = new Label("房间状态："+ state);
+        roomState.setHeight(33.3f, Unit.PIXELS);
+        Label roomPrice = new Label("房间价格："+ price);
+        roomPrice.setHeight(33.3f,Unit.PIXELS);
+
+        roomInfoLayout.addComponent(roomType);
+        roomInfoLayout.addComponent(roomState);
+        roomInfoLayout.addComponent(roomPrice);
+
+
+        if(state.equals("空闲")) {
+            info.addClickListener(new MouseEvents.ClickListener() {
+                @Override
+                public void click(MouseEvents.ClickEvent clickEvent) {
+                    Notification notification = new Notification("CLICKED");
+                    notification.show(Page.getCurrent());
+
+                    Window book = new Window("预订");
+
+
+                    UI.getCurrent().addWindow(book);
+
+                }
+            });
+        }
+
+        info.setContent(roomInfoLayout);
+
+        return info;
+
+    }
 }
