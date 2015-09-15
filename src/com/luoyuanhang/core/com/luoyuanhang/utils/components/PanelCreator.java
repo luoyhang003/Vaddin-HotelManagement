@@ -12,6 +12,7 @@ import com.vaadin.server.Sizeable.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.Calendar;
 
@@ -137,6 +138,9 @@ public class PanelCreator {
                 if(flag == 0){
                     Notification notification = new Notification("用户身份登录！");
                     notification.show(Page.getCurrent());
+
+                    layout.removeAllComponents();
+                    layout.addComponent(PanelCreator.createUserTab(connection,username));
                 }
 
                 if(flag == 1){
@@ -409,12 +413,80 @@ public class PanelCreator {
 
         VerticalLayout record = new VerticalLayout();
 
+        Table bookTable = new Table("预订");
+        bookTable.setImmediate(true);
+
+        bookTable.setSizeFull();
+//        bookTable.setColumnHeaders(new String[]{"房间号","预订时间","入住时间","经办"});
+        bookTable.addContainerProperty("房间号",String.class,null);
+        bookTable.addContainerProperty("预订时间",Timestamp.class,null);
+        bookTable.addContainerProperty("入住时间",String.class,null);
+
+        try{
+            String SQL_queryBook = "SELECT rid,indate,bdate,bemployee FROM book WHERE book.cid = '"+id+"'";
+
+            ResultSet rs_book = connector.query(SQL_queryBook);
+
+            for(int i = 1;rs_book.next();i++){
+                String book_rid = rs_book.getString("rid");
+                String book_indate = rs_book.getString("indate");
+                Timestamp bdate_timestamp = rs_book.getTimestamp("bdate");
+
+                bookTable.addItem(new Object[]{book_rid,bdate_timestamp,
+                        book_indate},new Integer(i));
+            }
+
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+//        int count_book_info = 1;
+//        try{
+//
+//            String SQL_queryBookinfo = "SELECT rid,indate FROM book WHERE cid = '12345'";
+//
+//            ResultSet resultSet_book_info = connector.query(SQL_queryBookinfo);
+//            if(resultSet_book_info.next()){
+//                String rid = resultSet_book_info.getNString("rid");
+////                Date bdate = resultSet_book_info.getTimestamp("bdate");
+//                String indate = resultSet_book_info.getString("indate");
+//
+//
+//                Calendar calendar_bookinfo = Calendar.getInstance();
+////                calendar_bookinfo.setTime(bdate);
+//
+//                String sbdate = ""+calendar_bookinfo.get(Calendar.YEAR)+calendar_bookinfo.get(Calendar.MONTH)
+//                        + calendar_bookinfo.get(Calendar.DATE);
+//
+//                bookTable.addItem(new Object[]{rid,indate},new Integer(1));
+//                count_book_info ++;
+//            }
+//
+//        }catch (SQLException e){
+//            e.printStackTrace();
+//            Notification notification = new Notification("ERROR!");
+//            notification.show(Page.getCurrent());
+//        }
+        record.addComponent(bookTable);
+
+
+
+        Table inTable = new Table("入住");
+
+
+
+
+
+        Table outTable = new Table("退房");
+
 
 
 
         tabSheet.addTab(info,"个人信息");
         tabSheet.addTab(roominfo,"房间信息");
         tabSheet.addTab(record,"个人记录");
+
 
 
 

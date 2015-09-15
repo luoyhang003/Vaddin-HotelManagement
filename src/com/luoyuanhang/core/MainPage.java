@@ -16,19 +16,35 @@ import com.vaadin.ui.*;
 
 
 public class MainPage extends UI{
-    protected void init(VaadinRequest request){
+    protected void init (VaadinRequest request){
         DBConnector connector = new DBConnector();
 
-        VerticalLayout layout = new VerticalLayout();
-
-        TabSheet tabSheet = PanelCreator.createUserTab(connector,"11116");
-
-        layout.addComponent(tabSheet);
+        VerticalLayout layout = PanelCreator.createLoginWindow(connector);
 
         setContent(layout);
-
     }
 }
+
+
+
+
+/*=================TEST INSTANCE=====================*/
+//test customer book
+
+//public class MainPage extends UI{
+//    protected void init(VaadinRequest request){
+//        DBConnector connector = new DBConnector();
+//
+//        VerticalLayout layout = new VerticalLayout();
+//
+//        TabSheet tabSheet = PanelCreator.createUserTab(connector,"11116");
+//
+//        layout.addComponent(tabSheet);
+//
+//        setContent(layout);
+//
+//    }
+//}
 
 /*=================TEST INSTANCE=====================*/
 //test room info panel
