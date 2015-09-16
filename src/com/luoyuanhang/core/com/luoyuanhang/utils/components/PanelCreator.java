@@ -714,8 +714,12 @@ public class PanelCreator {
                     @Override
                     public void itemClick(ItemClickEvent itemClickEvent) {
                         String rid = itemClickEvent.getItem().getItemProperty("房间号").toString();
-                        Notification notification = new Notification("rid:"+rid);
-                        notification.show(Page.getCurrent());
+
+                        Window win_recp_roominfo = new Window(rid);
+
+                        VerticalLayout layout_recp_roominfo = new VerticalLayout();
+
+                        //TODO
                     }
                 };
 
@@ -752,7 +756,163 @@ public class PanelCreator {
         Button btn_bookroom = new Button("办理预订");
         btn_bookroom.setSizeFull();
 
-        Button btn_checkin = new Button("办理入住");
+        final Button btn_checkin = new Button("办理入住", new Button.ClickListener() {
+            @Override
+            public void buttonClick(Button.ClickEvent clickEvent) {
+                Window win_checkin = new Window("办理入住");
+                win_checkin.setImmediate(true);
+                win_checkin.setSizeFull();
+
+                VerticalLayout layout_checkin = new VerticalLayout();
+                layout_checkin.setSizeFull();
+                layout_checkin.setImmediate(true);
+
+                Table tb_checkin = new Table();
+                tb_checkin.setSizeFull();
+
+                tb_checkin.addContainerProperty("房间号",String.class,null);
+                tb_checkin.addContainerProperty("预订人",String.class,null);
+                tb_checkin.addContainerProperty("预订时间",Timestamp.class,null);
+                tb_checkin.addContainerProperty("房间类型",String.class,null);
+                tb_checkin.addContainerProperty("价格",Integer.class,null);
+
+
+                try{
+                    String SQL_QUERY_CHECKIN = "SELECT rid,cname,bdate,type,price FROM book NATURAL "
+                            +" JOIN room NATURAL JOIN customer WHERE state = '1'";
+                    ResultSet rs_checkin = connector.query(SQL_QUERY_CHECKIN);
+
+                    for(int i = 1; rs_checkin.next(); i++){
+                        String str_rid = rs_checkin.getString("rid");
+                        String str_cname = rs_checkin.getString("cname");
+                        Timestamp ts_bdate = rs_checkin.getTimestamp("bdate");
+                        String str_type = rs_checkin.getString("type");
+                        int int_price = rs_checkin.getInt("price");
+
+                        switch (str_type){
+                            case "0":
+                                str_type = "单人间";
+                                break;
+                            case "1":
+                                str_type = "标准间";
+                                break;
+                            case "2":
+                                str_type = "豪华间";
+                                break;
+                            case "3":
+                                str_type = "商务间";
+                                break;
+                        }
+
+                        tb_checkin.addItem(new Object[]{str_rid,str_cname,ts_bdate,str_type,int_price},
+                                new Integer(i));
+                    }
+
+
+                }catch (SQLException e){
+                    e.printStackTrace();
+                }
+
+                ItemClickEvent.ItemClickListener itemClickListener = new ItemClickEvent.ItemClickListener() {
+                    @Override
+                    public void itemClick(ItemClickEvent itemClickEvent) {
+                        Window win_checkin_confirm = new Window("确认入住");
+
+                        VerticalLayout layout_checkin_confirm = new VerticalLayout();
+
+                        final String rid = itemClickEvent.getItem().getItemProperty("房间号").toString();
+
+
+
+                        Button btn_checkin = new Button("入住", new Button.ClickListener() {
+                            @Override
+                            public void buttonClick(Button.ClickEvent clickEvent) {
+                                String SQL_CHECKIN_OK = "UPDATE room SET state = '2' WHERE rid='"+rid+"'";
+                                connector.update(SQL_CHECKIN_OK);
+
+//                                try{
+//                                    String SQL_QUERY_BOOK_CID = "";
+//                                }catch(SQLException e){
+//                                    e.printStackTrace();
+//                                }
+
+
+                                String SQL_CHECKIN_INSERT = "INSERT INTO checkin(rid,cid,iemployee) values('"+
+                                        rid+"','"+"123"+"','"+eid+"')";
+                                connector.update(SQL_CHECKIN_INSERT);
+
+                                Notification notification_ok = new Notification("已办理入住");
+                                notification_ok.show(Page.getCurrent());
+
+
+
+                            }
+                        });
+
+
+                        String SQL_QUERY_CHECKIN_CONFIRM = "SELECT rid,cname,bdate,type,price FROM book NATURAL "
+                                +" JOIN room NATURAL JOIN customer WHERE state = '1' and rid = '"+rid+"'";
+                        String confirm_rid = "";
+                        String confirm_cname = "";
+                        String confirm_type = "";
+                        int confirm_price = 0;
+                        try{
+                            ResultSet rs_checkin_confirm = connector.query(SQL_QUERY_CHECKIN_CONFIRM);
+                            if(rs_checkin_confirm.next()){
+                                confirm_rid = rs_checkin_confirm.getString("rid");
+                                confirm_cname = rs_checkin_confirm.getString("cname");
+                                confirm_type = rs_checkin_confirm.getString("type");
+                                confirm_price = rs_checkin_confirm.getInt("price");
+
+                            }
+                        }catch (SQLException e){
+                            e.printStackTrace();
+                        }
+
+                        Label label_rid = new Label("房间号：  "+confirm_rid);
+                        label_rid.setSizeFull();
+                        Label label_cname = new Label("预订人：  "+confirm_cname);
+                        label_cname.setSizeFull();
+                        Label label_type = new Label();
+                        switch (confirm_type){
+                            case "0":
+                                label_type = new Label("房间类型： 单人间");
+                                break;
+                            case "1":
+                                label_type = new Label("房间类型： 标准间");
+                                break;
+                            case "2":
+                                label_type = new Label("房间类型： 豪华间");
+                                break;
+                            case "3":
+                                label_type = new Label("房间类型： 商务间");
+                                break;
+
+                        }
+                        Label label_price = new Label("价格：   "+confirm_price);
+
+                        layout_checkin_confirm.addComponent(label_rid);
+                        layout_checkin_confirm.addComponent(label_cname);
+                        layout_checkin_confirm.addComponent(label_type);
+                        layout_checkin_confirm.addComponent(label_price);
+                        layout_checkin_confirm.addComponent(btn_checkin);
+
+                        win_checkin_confirm.setContent(layout_checkin_confirm);
+
+                        UI.getCurrent().addWindow(win_checkin_confirm);
+
+
+                    }
+                };
+
+                tb_checkin.addItemClickListener(itemClickListener);
+
+                layout_checkin.addComponent(tb_checkin);
+                win_checkin.setContent(layout_checkin);
+                UI.getCurrent().addWindow(win_checkin);
+
+            }
+        });
         btn_checkin.setSizeFull();
 
         Button btn_checkout = new Button("办理退房");

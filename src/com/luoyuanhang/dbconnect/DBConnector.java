@@ -161,7 +161,7 @@ public class DBConnector {
             addLog("DATABASE: UPDATE <" + sql + "> SUCCESS!\n");
         }catch(SQLException e){
             e.printStackTrace();
-            addLog("DATABASE: UPDATE FAIL!\n");
+            addLog("DATABASE: UPDATE <" + sql + ">FAIL!\n");
         }
         return  count;
     }
