@@ -1,6 +1,7 @@
 package com.luoyuanhang.core.com.luoyuanhang.utils.components;
 
 import com.luoyuanhang.dbconnect.DBConnector;
+import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.MouseEvents;
 import com.vaadin.server.*;
 import com.vaadin.ui.*;
@@ -122,13 +123,7 @@ public class PanelCreator {
                             Notification notification = new Notification("登录错误", "请先注册或者重新输入！");
                             notification.show(Page.getCurrent());
 
-                        } else {
-                            Notification notification = new Notification("SUCCESS");
-                            notification.show(Page.getCurrent());
-
                         }
-
-
                     }
 
                }catch (SQLException e){
@@ -146,6 +141,24 @@ public class PanelCreator {
                 if(flag == 1){
                     Notification notification = new Notification("员工身份登录！");
                     notification.show(Page.getCurrent());
+
+                    String role_flag = "";
+
+                    try{
+                        String SQL_QUERY_EMP_ROLE = "SELECT role FROM employee WHERE eid='"+username+"'";
+                        ResultSet rs_query_emp_role = connection.query(SQL_QUERY_EMP_ROLE);
+                        if(rs_query_emp_role.next()) {
+                            role_flag = rs_query_emp_role.getString("role");
+                        }
+                    }catch (SQLException e){
+                        e.printStackTrace();
+                    }
+
+                    if(role_flag.equals("2")) {
+                        layout.removeAllComponents();
+                        layout.addComponent(createReciptorLayout(connection, username));
+                    }
+
                 }
 
             }
@@ -156,12 +169,6 @@ public class PanelCreator {
         Button register = new Button("注册", new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent clickEvent) {
-//                final String username = "";
-//                String password = "";
-//                String name = "";
-//                int sex = 0;
-//                String tel = "";
-
                 Window window = new Window("注册");
 
                 FormLayout formLayout = new FormLayout();
@@ -295,20 +302,19 @@ public class PanelCreator {
 
 
     /**
-     * 用户登录系统
+     * 进入用户系统的面板
      *
      * @return Tabsheet
      */
     public static TabSheet createUserTab(DBConnector connector, String id){
+        //用户面板
         TabSheet tabSheet = new TabSheet();
-
         tabSheet.setWidth(Page.getCurrent().getBrowserWindowWidth()+"");
         tabSheet.setHeight(Page.getCurrent().getBrowserWindowHeight()+"");
-
         tabSheet.setSizeFull();
 
+        //个人信息切换卡
         VerticalLayout info = new VerticalLayout();
-
         info.setMargin(true);
 
         String SQL_info = "SELECT cid,cname,csex,cphone,vip FROM customer WHERE cid = '"+id+"'";
@@ -527,8 +533,11 @@ public class PanelCreator {
 
         if(state.equals("0"))
             state = "空闲";
-        else{
-            state = "已满";
+        else if(state.equals("1")){
+            state = "已预订";
+        }
+        else if(state.equals("2")){
+            state = "已入住";
         }
 
         if(type.equals("0")){
@@ -663,5 +672,101 @@ public class PanelCreator {
 
         return info;
 
+    }
+
+    public static VerticalLayout createReciptorLayout(final DBConnector connector,final String eid){
+        final VerticalLayout layout = new VerticalLayout();
+//        layout.setSizeFull();
+
+        String ename="";
+
+        try{
+            String SQL_QUERY_EMPLOYEENAME = "SELECT ename FROM employee WHERE eid = '"+ eid +"';";
+            ResultSet rs_employee_name = connector.query(SQL_QUERY_EMPLOYEENAME);
+            if(rs_employee_name.next()) {
+                ename = rs_employee_name.getString("ename");
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        Label label = new Label("登录身份：  前台"+ename);
+        label.setSizeFull();
+
+        Button btn_roominfo = new Button("查看房间", new Button.ClickListener() {
+            @Override
+            public void buttonClick(Button.ClickEvent clickEvent) {
+                Window win_roominfo = new Window("房间情况");
+                win_roominfo.setSizeFull();
+
+                VerticalLayout layout_room_info = new VerticalLayout();
+                layout_room_info.setSizeFull();
+
+                Table tb_room_info = new Table();
+                tb_room_info.setSizeFull();
+
+                tb_room_info.addContainerProperty("房间号",String.class,null);
+                tb_room_info.addContainerProperty("房间类型",String.class,null);
+                tb_room_info.addContainerProperty("房间价格",Integer.class,null);
+                tb_room_info.addContainerProperty("房间状态",String.class,null);
+
+                ItemClickEvent.ItemClickListener itemClickListener = new ItemClickEvent.ItemClickListener() {
+                    @Override
+                    public void itemClick(ItemClickEvent itemClickEvent) {
+                        String rid = itemClickEvent.getItem().getItemProperty("房间号").toString();
+                        Notification notification = new Notification("rid:"+rid);
+                        notification.show(Page.getCurrent());
+                    }
+                };
+
+                tb_room_info.addItemClickListener(itemClickListener);
+
+                try{
+                    String SQL_QUERY_RECPT_ROOM = "SELECT rid,type,price,state FROM room;";
+                    ResultSet rs_query_recpt_room = connector.query(SQL_QUERY_RECPT_ROOM);
+                    for(int i = 1;rs_query_recpt_room.next();i++ ){
+                        String str_rid = rs_query_recpt_room.getString("rid");
+                        String str_type = rs_query_recpt_room.getString("type");
+                        int int_price = rs_query_recpt_room.getInt("price");
+                        String str_state  = rs_query_recpt_room.getString("state");
+
+                        tb_room_info.addItem(new Object[]{str_rid,str_type,int_price,str_state},new Integer(i));
+                    }
+                }catch (SQLException e){
+                    e.printStackTrace();
+                }
+
+                layout_room_info.addComponent(tb_room_info);
+
+                win_roominfo.setContent(layout_room_info);
+
+                UI.getCurrent().addWindow(win_roominfo);
+
+
+
+
+            }
+        });
+        btn_roominfo.setSizeFull();
+
+        Button btn_bookroom = new Button("办理预订");
+        btn_bookroom.setSizeFull();
+
+        Button btn_checkin = new Button("办理入住");
+        btn_checkin.setSizeFull();
+
+        Button btn_checkout = new Button("办理退房");
+        btn_checkout.setSizeFull();
+
+
+        layout.addComponent(label);
+
+        layout.addComponent(btn_roominfo);
+        layout.addComponent(btn_bookroom);
+        layout.addComponent(btn_checkin);
+        layout.addComponent(btn_checkout);
+
+
+        return layout;
     }
 }
