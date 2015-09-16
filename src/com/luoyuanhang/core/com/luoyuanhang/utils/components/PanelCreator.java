@@ -478,16 +478,36 @@ public class PanelCreator {
 
 
         Table outTable = new Table("退房");
+        outTable.setImmediate(true);
+        outTable.setSizeFull();
+        outTable.addContainerProperty("房间号",String.class,null);
+        outTable.addContainerProperty("入住时间",Timestamp.class,null);
+        outTable.addContainerProperty("退房时间",Timestamp.class,null);
+        outTable.addContainerProperty("花费",Integer.class,null);
 
+        try{
+            String SQL_QUERY_CHECKOUT = "SELECT rid,idate,odate,fee FROM book NATURAL JOIN "+
+                    "checkin NATURAL JOIN checkout WHERE cid = '"+id+"'";
+            ResultSet rs_query_out = connector.query(SQL_QUERY_CHECKOUT);
 
+            for(int i = 1; rs_query_out.next();i++){
+                String str_rid = rs_query_out.getString("rid");
+                Timestamp ts_idate = rs_query_out.getTimestamp("idate");
+                Timestamp ts_odate = rs_query_out.getTimestamp("odate");
+                int int_fee = rs_query_out.getInt("fee");
+
+                outTable.addItem(new Object[]{str_rid,ts_idate,ts_odate,int_fee},new Integer(i));
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        record.addComponent(outTable);
 
 
         tabSheet.addTab(info,"个人信息");
         tabSheet.addTab(roominfo,"房间信息");
         tabSheet.addTab(record,"个人记录");
-
-
-
 
 
 
