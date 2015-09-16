@@ -827,19 +827,26 @@ public class PanelCreator {
                         Button btn_checkin = new Button("入住", new Button.ClickListener() {
                             @Override
                             public void buttonClick(Button.ClickEvent clickEvent) {
-                                String SQL_CHECKIN_OK = "UPDATE room SET state = '2' WHERE rid='"+rid+"'";
-                                connector.update(SQL_CHECKIN_OK);
 
-//                                try{
-//                                    String SQL_QUERY_BOOK_CID = "";
-//                                }catch(SQLException e){
-//                                    e.printStackTrace();
-//                                }
+                                String cid = "";
+
+                                try{
+                                    String SQL_QUERY_BOOK_CID = "SELECT cid FROM book NATURAL JOIN room"+
+                                            " WHERE state = 1 AND rid = '"+rid+"'";
+                                    ResultSet rs_query_book_cid = connector.query(SQL_QUERY_BOOK_CID);
+                                    if(rs_query_book_cid.next())
+                                        cid = rs_query_book_cid.getString("cid");
+                                }catch(SQLException e){
+                                    e.printStackTrace();
+                                }
 
 
                                 String SQL_CHECKIN_INSERT = "INSERT INTO checkin(rid,cid,iemployee) values('"+
-                                        rid+"','"+"123"+"','"+eid+"')";
+                                        rid+"','"+cid+"','"+eid+"')";
                                 connector.update(SQL_CHECKIN_INSERT);
+
+                                String SQL_CHECKIN_OK = "UPDATE room SET state = '2' WHERE rid='"+rid+"'";
+                                connector.update(SQL_CHECKIN_OK);
 
                                 Notification notification_ok = new Notification("已办理入住");
                                 notification_ok.show(Page.getCurrent());
