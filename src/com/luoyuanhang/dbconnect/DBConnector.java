@@ -142,7 +142,7 @@ public class DBConnector {
             addLog("DATABASE: QUERY <" + sql + "> SUCCESS!\n");
         }catch (SQLException e){
             e.printStackTrace();
-            addLog("DATABASE: QUERY FAIL!\n");
+            addLog("DATABASE: QUERY<"+ sql+"> FAIL!\n");
         }finally {
             return resultSet;
         }

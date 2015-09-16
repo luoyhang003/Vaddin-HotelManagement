@@ -309,6 +309,8 @@ public class PanelCreator {
 
         VerticalLayout info = new VerticalLayout();
 
+        info.setMargin(true);
+
         String SQL_info = "SELECT cid,cname,csex,cphone,vip FROM customer WHERE cid = '"+id+"'";
 
         info.addComponent(new Label("您好，"));
@@ -441,39 +443,36 @@ public class PanelCreator {
             e.printStackTrace();
         }
 
-//        int count_book_info = 1;
-//        try{
-//
-//            String SQL_queryBookinfo = "SELECT rid,indate FROM book WHERE cid = '12345'";
-//
-//            ResultSet resultSet_book_info = connector.query(SQL_queryBookinfo);
-//            if(resultSet_book_info.next()){
-//                String rid = resultSet_book_info.getNString("rid");
-////                Date bdate = resultSet_book_info.getTimestamp("bdate");
-//                String indate = resultSet_book_info.getString("indate");
-//
-//
-//                Calendar calendar_bookinfo = Calendar.getInstance();
-////                calendar_bookinfo.setTime(bdate);
-//
-//                String sbdate = ""+calendar_bookinfo.get(Calendar.YEAR)+calendar_bookinfo.get(Calendar.MONTH)
-//                        + calendar_bookinfo.get(Calendar.DATE);
-//
-//                bookTable.addItem(new Object[]{rid,indate},new Integer(1));
-//                count_book_info ++;
-//            }
-//
-//        }catch (SQLException e){
-//            e.printStackTrace();
-//            Notification notification = new Notification("ERROR!");
-//            notification.show(Page.getCurrent());
-//        }
         record.addComponent(bookTable);
 
 
 
         Table inTable = new Table("入住");
 
+        inTable.setImmediate(true);
+        inTable.setSizeFull();
+        inTable.addContainerProperty("房间号",String.class,null);
+        inTable.addContainerProperty("入住时间",Timestamp.class,null);
+        inTable.addContainerProperty("经办",String.class,null);
+
+        try{
+            String SQL_QUERY_IN_INFO = "SELECT rid,idate,ename FROM checkin " +
+                    "NATURAL JOIN employee WHERE checkin.cid = '"+id+"' AND iemployee = eid";
+            ResultSet rs_query_in_info = connector.query(SQL_QUERY_IN_INFO);
+            for(int i = 1; rs_query_in_info.next();i++){
+                String rid_checkin = rs_query_in_info.getString("rid");
+                Timestamp idate_checkin = rs_query_in_info.getTimestamp("idate");
+                String iemployee_checkin = rs_query_in_info.getString("ename");
+
+                inTable.addItem(new Object[]{rid_checkin,idate_checkin,iemployee_checkin},new Integer(i));
+
+
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        record.addComponent(inTable);
 
 
 
