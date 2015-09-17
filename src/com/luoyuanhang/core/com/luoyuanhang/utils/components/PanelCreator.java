@@ -158,6 +158,11 @@ public class PanelCreator {
                         layout.removeAllComponents();
                         layout.addComponent(createReciptorLayout(connection, username));
                     }
+                    //经理登录
+                    else if(role_flag.equals("0")){
+                        layout.removeAllComponents();
+                        layout.addComponent(createManagerLayout(connection,username));
+                    }
 
                 }
 
@@ -521,6 +526,17 @@ public class PanelCreator {
         return tabSheet;
     }
 
+    /**
+     * 创建房间信息
+     *
+     * @param roomId 房间号
+     * @param type 房间类型
+     * @param state 房间状态
+     * @param price 房间价格
+     * @param connector 数据库连接
+     * @param userID 用户 ID
+     * @return 房间信息面板
+     */
     public static Panel createRoomInfo(final String roomId,String type,String state,String price,
                                        final DBConnector connector, final String userID){
         Panel info = new Panel(roomId);
@@ -674,6 +690,14 @@ public class PanelCreator {
 
     }
 
+
+    /**
+     * 创建前台界面
+     *
+     * @param connector 数据库连接
+     * @param eid 员工号
+     * @return
+     */
     public static VerticalLayout createReciptorLayout(final DBConnector connector,final String eid){
         final VerticalLayout layout = new VerticalLayout();
 
@@ -1309,4 +1333,116 @@ public class PanelCreator {
 
         return layout;
     }
+
+
+
+    public static VerticalLayout createAccountantLaout(final DBConnector connector,final String eid){
+        VerticalLayout layout = new VerticalLayout();
+
+        String ename="";
+
+        try{
+            String SQL_QUERY_EMPLOYEENAME = "SELECT ename FROM employee WHERE eid = '"+ eid +"';";
+            ResultSet rs_employee_name = connector.query(SQL_QUERY_EMPLOYEENAME);
+            if(rs_employee_name.next()) {
+                ename = rs_employee_name.getString("ename");
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        Label label = new Label("登录身份：  会计："+ename);
+        label.setSizeFull();
+
+
+        return  layout;
+    }
+
+
+
+    public static VerticalLayout createManagerLayout(final DBConnector connector,final String eid){
+        VerticalLayout layout = new VerticalLayout();
+
+        Button btn_employee_info = new Button("查看员工", new Button.ClickListener() {
+            @Override
+            public void buttonClick(Button.ClickEvent clickEvent) {
+                Window win_manager_employee_info = new Window("查看员工");
+                win_manager_employee_info.setSizeFull();
+                win_manager_employee_info.setImmediate(true);
+
+                VerticalLayout layout_win_manager_employee_info = new VerticalLayout();
+                layout_win_manager_employee_info.setSizeFull();
+                layout_win_manager_employee_info.setImmediate(true);
+
+                Table tb_manager_employee_info = new Table();
+                tb_manager_employee_info.setImmediate(true);
+                tb_manager_employee_info.setSizeFull();
+
+                tb_manager_employee_info.addContainerProperty("员工号",String.class,null);
+                tb_manager_employee_info.addContainerProperty("姓名",String.class,null);
+                tb_manager_employee_info.addContainerProperty("性别",String.class,null);
+                tb_manager_employee_info.addContainerProperty("手机号",String.class,null);
+                tb_manager_employee_info.addContainerProperty("职位",String.class,null);
+                tb_manager_employee_info.addContainerProperty("工资",String.class,null);
+                tb_manager_employee_info.addContainerProperty("状态",String.class,null);
+
+                try{
+                    String SQL_QUERY_ALL_EMPLOYEE_INFO = "SELECT * FROM employee";
+                    ResultSet rs_query_all_employee_info = connector.query(SQL_QUERY_ALL_EMPLOYEE_INFO);
+
+                    for(int i = 1; rs_query_all_employee_info.next(); i++){
+                        String str_eid = rs_query_all_employee_info.getString("eid");
+                        String str_ename = rs_query_all_employee_info.getString("ename");
+                        String str_sex = rs_query_all_employee_info.getString("esex");
+                        String str_ephone = rs_query_all_employee_info.getString("ephone");
+                        String str_role = rs_query_all_employee_info.getString("role");
+                        int int_salary = rs_query_all_employee_info.getInt("salary");
+                        String str_isexist = rs_query_all_employee_info.getString("isexist");
+
+
+
+                        tb_manager_employee_info.addItem(new Object[]{str_eid,str_ename,str_sex,
+                        str_ephone,str_role,""+int_salary,str_isexist},new Integer(i));
+                    }
+                }catch (SQLException e){
+                    e.printStackTrace();
+                }
+
+
+                layout_win_manager_employee_info.addComponent(tb_manager_employee_info);
+
+                win_manager_employee_info.setContent(layout_win_manager_employee_info);
+
+                UI.getCurrent().addWindow(win_manager_employee_info);
+
+
+            }
+        });
+        btn_employee_info.setSizeFull();
+
+        Button btn_manage_employee = new Button("任免员工", new Button.ClickListener() {
+            @Override
+            public void buttonClick(Button.ClickEvent clickEvent) {
+
+            }
+        });
+        btn_manage_employee.setSizeFull();
+
+        Button btn_chart = new Button("查看报表", new Button.ClickListener() {
+            @Override
+            public void buttonClick(Button.ClickEvent clickEvent) {
+
+            }
+        });
+        btn_chart.setSizeFull();
+
+
+
+        layout.addComponent(btn_employee_info);
+        layout.addComponent(btn_manage_employee);
+        layout.addComponent(btn_chart);
+
+        return layout;
+    }
+
 }
