@@ -1500,12 +1500,16 @@ public class PanelCreator {
                                 String str_epassword = password_pf.getValue();
                                 String str_ename = name_tf.getValue();
                                 String str_esex = "0";
-                                if(sex_og.getValue().equals("2"))
+
+                                Notification n =new Notification(sex_og.getValue().toString());
+                                n.show(Page.getCurrent());
+
+                                if(sex_og.getValue().toString().equals("2"))
                                     str_esex = "1";
                                 String str_ephone = tel_tf.getValue();
-                                String str_role = "2";
-                                if(role_og.getValue().equals("1"))
-                                    str_role = "1";
+                                String str_role = role_og.getValue().toString();
+//                                if(role_og.getValue().toString().equals("1"))
+//                                    str_role = "1";
                                 int int_salary = Integer.parseInt(salary_tf.getValue());
 
                                 String SQL_ADD_EMPLOYEE = "INSERT INTO employee(eid,ename,esex,epassword,"+
