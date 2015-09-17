@@ -1361,7 +1361,7 @@ public class PanelCreator {
 
 
     public static VerticalLayout createManagerLayout(final DBConnector connector,final String eid){
-        VerticalLayout layout = new VerticalLayout();
+        final VerticalLayout layout = new VerticalLayout();
 
         Button btn_employee_info = new Button("查看员工", new Button.ClickListener() {
             @Override
@@ -1400,6 +1400,37 @@ public class PanelCreator {
                         String str_isexist = rs_query_all_employee_info.getString("isexist");
 
 
+                        switch (str_sex){
+                            case "0":
+                                str_sex = "男";
+                                break;
+                            case "1":
+                                str_sex = "女";
+                                break;
+                        }
+
+                        switch (str_role){
+                            case "0":
+                                str_role = "经理";
+                                break;
+                            case "1":
+                                str_role = "会计";
+                                break;
+                            case "2":
+                                str_role = "前台";
+                                break;
+                        }
+
+                        switch (str_isexist){
+                            case "0":
+                                str_isexist = "在职";
+                                break;
+                            case "1":
+                                str_isexist = "离职";
+                                break;
+                        }
+
+
 
                         tb_manager_employee_info.addItem(new Object[]{str_eid,str_ename,str_sex,
                         str_ephone,str_role,""+int_salary,str_isexist},new Integer(i));
@@ -1423,6 +1454,218 @@ public class PanelCreator {
         Button btn_manage_employee = new Button("任免员工", new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent clickEvent) {
+                Window win_manage_employee = new Window("员工任免");
+                win_manage_employee.setImmediate(true);
+                win_manage_employee.setSizeFull();
+
+                final VerticalLayout layout_win_manage_employee = new VerticalLayout();
+                layout_win_manage_employee.setImmediate(true);
+                layout_win_manage_employee.setSizeFull();
+
+                Button btn_add_employee = new Button("添加员工", new Button.ClickListener() {
+                    @Override
+                    public void buttonClick(Button.ClickEvent clickEvent) {
+                        final Window win_add_employee = new Window("添加员工");
+                        win_add_employee.setImmediate(true);
+//                        win_add_employee.setSizeFull();
+
+                        VerticalLayout layout_add_employee = new VerticalLayout();
+                        layout_win_manage_employee.setImmediate(true);
+
+                        FormLayout formLayout = new FormLayout();
+                        formLayout.setSizeUndefined();
+
+                        final TextField username_tf = new TextField("工号：");
+                        final PasswordField password_pf = new PasswordField("密码：");
+                        final TextField name_tf = new TextField("姓名：");
+                        final OptionGroup sex_og = new OptionGroup("性别：");
+                        sex_og.setNullSelectionAllowed(false);
+                        sex_og.addItem(1);
+                        sex_og.setItemCaption(1,"男");
+                        sex_og.addItem(2);
+                        sex_og.setItemCaption(2,"女");
+                        final TextField tel_tf = new TextField("电话：");
+                        final OptionGroup role_og = new OptionGroup("职位");
+                        role_og.setNullSelectionAllowed(false);
+                        role_og.addItem(1);
+                        role_og.setItemCaption(1,"会计");
+                        role_og.addItem(2);
+                        role_og.setItemCaption(2,"前台");
+                        final TextField salary_tf = new TextField("工资：");
+
+                        Button btn_add_employee_admit = new Button("确认", new Button.ClickListener() {
+                            @Override
+                            public void buttonClick(Button.ClickEvent clickEvent) {
+                                String str_eid = username_tf.getValue();
+                                String str_epassword = password_pf.getValue();
+                                String str_ename = name_tf.getValue();
+                                String str_esex = "0";
+                                if(sex_og.getValue().equals("2"))
+                                    str_esex = "1";
+                                String str_ephone = tel_tf.getValue();
+                                String str_role = "2";
+                                if(role_og.getValue().equals("1"))
+                                    str_role = "1";
+                                int int_salary = Integer.parseInt(salary_tf.getValue());
+
+                                String SQL_ADD_EMPLOYEE = "INSERT INTO employee(eid,ename,esex,epassword,"+
+                                        "ephone,role,salary) VALUES('"+str_eid+"','"+str_ename+"','"+str_esex+
+                                        "','"+str_epassword+"','"+str_ephone+"','"+str_role+"','"
+                                        +int_salary+"')";
+
+                                connector.update(SQL_ADD_EMPLOYEE);
+
+                                Notification notification_add_success = new Notification("添加成功");
+                                notification_add_success.show(Page.getCurrent());
+
+                                win_add_employee.close();
+
+
+                            }
+                        });
+
+
+
+
+
+
+                        formLayout.addComponent(username_tf);
+                        formLayout.addComponent(password_pf);
+                        formLayout.addComponent(name_tf);
+                        formLayout.addComponent(tel_tf);
+                        formLayout.addComponent(sex_og);
+                        formLayout.addComponent(role_og);
+                        formLayout.addComponent(salary_tf);
+                        formLayout.addComponent(btn_add_employee_admit);
+
+                        win_add_employee.setContent(formLayout);
+
+                        UI.getCurrent().addWindow(win_add_employee);
+
+                    }
+
+
+                });
+
+
+                Table tb_manager_employee_info = new Table("开除员工");
+                tb_manager_employee_info.setImmediate(true);
+                tb_manager_employee_info.setSizeFull();
+
+                tb_manager_employee_info.addContainerProperty("员工号",String.class,null);
+                tb_manager_employee_info.addContainerProperty("姓名",String.class,null);
+                tb_manager_employee_info.addContainerProperty("性别",String.class,null);
+                tb_manager_employee_info.addContainerProperty("手机号",String.class,null);
+                tb_manager_employee_info.addContainerProperty("职位", String.class, null);
+                tb_manager_employee_info.addContainerProperty("工资", String.class, null);
+                tb_manager_employee_info.addContainerProperty("状态",String.class,null);
+
+
+                ItemClickEvent.ItemClickListener itemClickListener_remove_employee =
+                        new ItemClickEvent.ItemClickListener() {
+                            @Override
+                            public void itemClick(ItemClickEvent itemClickEvent) {
+                                String str_eid = itemClickEvent.getItem().getItemProperty("员工号").toString();
+                                String str_ename = itemClickEvent.getItem().getItemProperty("姓名").toString();
+                                String str_role = itemClickEvent.getItem().getItemProperty("职位").toString();
+                                String str_salary = itemClickEvent.getItem().getItemProperty("工资").toString();
+
+                                Window win_remove_confirm = new Window("开除员工");
+                                win_remove_confirm.setImmediate(true);
+
+                                VerticalLayout layout_remove_confirm = new VerticalLayout();
+                                layout_remove_confirm.setImmediate(true);
+                                layout_remove_confirm.setMargin(true);
+
+                                Label label_eid = new Label("员工号： "+ str_eid);
+                                Label label_ename = new Label("姓名： "+str_ename);
+                                Label label_role = new Label("职位： "+str_role);
+                                Label label_salary = new Label("工资： "+str_salary);
+
+                                Button btn_remove_admit = new Button("确认", new Button.ClickListener() {
+                                    @Override
+                                    public void buttonClick(Button.ClickEvent clickEvent) {
+
+                                    }
+                                });
+
+                                layout_remove_confirm.addComponent(label_eid);
+                                layout_remove_confirm.addComponent(label_ename);
+                                layout_remove_confirm.addComponent(label_role);
+                                layout_remove_confirm.addComponent(label_salary);
+                                layout_remove_confirm.addComponent(btn_remove_admit);
+
+
+
+
+
+                            }
+                        };
+
+                tb_manager_employee_info.addItemClickListener(itemClickListener_remove_employee);
+
+                try{
+                    String SQL_QUERY_ALL_EMPLOYEE_INFO = "SELECT * FROM employee";
+                    ResultSet rs_query_all_employee_info = connector.query(SQL_QUERY_ALL_EMPLOYEE_INFO);
+
+                    for(int i = 1; rs_query_all_employee_info.next(); i++){
+                        String str_eid = rs_query_all_employee_info.getString("eid");
+                        String str_ename = rs_query_all_employee_info.getString("ename");
+                        String str_sex = rs_query_all_employee_info.getString("esex");
+                        String str_ephone = rs_query_all_employee_info.getString("ephone");
+                        String str_role = rs_query_all_employee_info.getString("role");
+                        int int_salary = rs_query_all_employee_info.getInt("salary");
+                        String str_isexist = rs_query_all_employee_info.getString("isexist");
+
+
+                        switch (str_sex){
+                            case "0":
+                                str_sex = "男";
+                                break;
+                            case "1":
+                                str_sex = "女";
+                                break;
+                        }
+
+                        switch (str_role){
+                            case "0":
+                                str_role = "经理";
+                                break;
+                            case "1":
+                                str_role = "会计";
+                                break;
+                            case "2":
+                                str_role = "前台";
+                                break;
+                        }
+
+                        switch (str_isexist){
+                            case "0":
+                                str_isexist = "在职";
+                                break;
+                            case "1":
+                                str_isexist = "离职";
+                                break;
+                        }
+
+
+
+                        tb_manager_employee_info.addItem(new Object[]{str_eid,str_ename,str_sex,
+                                str_ephone,str_role,""+int_salary,str_isexist},new Integer(i));
+                    }
+                }catch (SQLException e){
+                    e.printStackTrace();
+                }
+
+
+
+                layout_win_manage_employee.addComponent(btn_add_employee);
+                layout_win_manage_employee.addComponent(tb_manager_employee_info);
+
+                win_manage_employee.setContent(layout_win_manage_employee);
+
+                UI.getCurrent().addWindow(win_manage_employee);
+
 
             }
         });
