@@ -153,7 +153,7 @@ public class PanelCreator {
                     }catch (SQLException e){
                         e.printStackTrace();
                     }
-
+                    //前台登录
                     if(role_flag.equals("2")) {
                         layout.removeAllComponents();
                         layout.addComponent(createReciptorLayout(connection, username));
@@ -676,7 +676,6 @@ public class PanelCreator {
 
     public static VerticalLayout createReciptorLayout(final DBConnector connector,final String eid){
         final VerticalLayout layout = new VerticalLayout();
-//        layout.setSizeFull();
 
         String ename="";
 
@@ -734,6 +733,33 @@ public class PanelCreator {
                         int int_price = rs_query_recpt_room.getInt("price");
                         String str_state  = rs_query_recpt_room.getString("state");
 
+                        switch (str_type){
+                            case "0":
+                                str_type = "单人间";
+                                break;
+                            case "1":
+                                str_type = "标准间";
+                                break;
+                            case "2":
+                                str_type = "豪华间";
+                                break;
+                            case "3":
+                                str_type = "商务间";
+                                break;
+                        }
+
+                        switch (str_state){
+                            case "0":
+                                str_state = "空闲";
+                                break;
+                            case "1":
+                                str_state = "已预订";
+                                break;
+                            case "2":
+                                str_state = "已入住";
+                                break;
+                        }
+
                         tb_room_info.addItem(new Object[]{str_rid,str_type,int_price,str_state},new Integer(i));
                     }
                 }catch (SQLException e){
@@ -753,7 +779,223 @@ public class PanelCreator {
         });
         btn_roominfo.setSizeFull();
 
-        Button btn_bookroom = new Button("办理预订");
+        Button btn_bookroom = new Button("办理预订", new Button.ClickListener() {
+            @Override
+            public void buttonClick(Button.ClickEvent clickEvent) {
+                Window win_book = new Window("办理预订");
+                win_book.setSizeFull();
+                win_book.setImmediate(true);
+
+                VerticalLayout layout_book = new VerticalLayout();
+                layout_book.setImmediate(true);
+                layout_book.setSizeFull();
+
+                Table tb_book = new Table("办理预订");
+                tb_book.setSizeFull();
+
+                tb_book.setHeight(100.0f, Unit.PERCENTAGE);
+
+                tb_book.addContainerProperty("房间号",String.class,null);
+                tb_book.addContainerProperty("房间类型",String.class,null);
+                tb_book.addContainerProperty("价格",Integer.class,null);
+
+                try{
+                    String SQL_QUERY_BOOK_INFO = "SELECT rid,type,price FROM room WHERE"
+                            +" state = '0'";
+                    ResultSet rs_query_book_info = connector.query(SQL_QUERY_BOOK_INFO);
+                    String str_rid = "";
+                    String str_state = "";
+                    String str_type = "";
+                    int int_price = 0;
+
+                    for(int i = 1; rs_query_book_info.next();i++){
+                        str_rid = rs_query_book_info.getString("rid");
+                        str_type = rs_query_book_info.getString("type");
+                        int_price = rs_query_book_info.getInt("price");
+
+                        switch (str_type){
+                            case "0":
+                                str_type = "单人间";
+                                break;
+                            case "1":
+                                str_type = "标准间";
+                                break;
+                            case "2":
+                                str_type = "豪华间";
+                                break;
+                            case "3":
+                                str_type = "商务间";
+                                break;
+                        }
+
+
+                        tb_book.addItem(new Object[]{str_rid,str_type,int_price},new Integer(i));
+
+
+                    }
+                }catch (SQLException e){
+                    e.printStackTrace();
+                }
+                final ItemClickEvent.ItemClickListener itemClickListener_book = new ItemClickEvent.ItemClickListener() {
+                    @Override
+                    public void itemClick(ItemClickEvent itemClickEvent) {
+                        final String str_item_rid = itemClickEvent.getItem().getItemProperty("房间号").toString();
+                        String str_item_type = itemClickEvent.getItem().getItemProperty("房间类型").toString();
+                        String str_item_price = itemClickEvent.getItem().getItemProperty("价格").toString();
+
+                        final Window win_recp_book = new Window("预订");
+                        win_recp_book.setImmediate(true);
+
+                        VerticalLayout layout_win_recp_book = new VerticalLayout();
+                        layout_win_recp_book.setImmediate(true);
+                        layout_win_recp_book.setMargin(true);
+
+                        Label label_win_recp_book = new Label("房间号： "+str_item_rid);
+                        Label label_win_recp_type = new Label("房间类型： "+str_item_type);
+                        Label label_win_recp_price = new Label("价格： "+str_item_price);
+
+                        final TextField tx_win_recp_cid = new TextField("身份证号：");
+                        tx_win_recp_cid.setInputPrompt("请输入身份证号");
+
+                        final TextField tx_win_recp_name = new TextField("姓名：");
+                        tx_win_recp_name.setSizeFull();
+                        tx_win_recp_name.setInputPrompt("请输入姓名");
+
+                        final OptionGroup og_win_recp_sex = new OptionGroup("性别：");
+                        og_win_recp_sex.setNullSelectionAllowed(false);
+                        og_win_recp_sex.addItem(1);
+                        og_win_recp_sex.setItemCaption(1,"男");
+                        og_win_recp_sex.addItem(2);
+                        og_win_recp_sex.setItemCaption(2,"女");
+                        og_win_recp_sex.setSizeFull();
+
+                        final TextField tx_win_recp_phone = new TextField("手机号：");
+                        tx_win_recp_phone.setInputPrompt("请输入手机号");
+                        tx_win_recp_phone.setSizeFull();
+
+                        final PopupDateField df_win_recp_indate = new PopupDateField("入住日期");
+
+
+                        Button btn_win_recp_admit = new Button("确定", new Button.ClickListener() {
+                            @Override
+                            public void buttonClick(Button.ClickEvent clickEvent) {
+                                String cid = tx_win_recp_cid.getValue();
+                                String cname = tx_win_recp_name.getValue();
+                                String cphone = tx_win_recp_phone.getValue();
+                                String csex = (og_win_recp_sex.getValue()==1)?"0":"1";
+                                String vip = "00000";
+
+                                Date date = df_win_recp_indate.getValue();
+                                Calendar calendar = Calendar.getInstance();
+                                calendar.setTime(date);
+                                String inDate = ""+calendar.get(Calendar.YEAR)+calendar.get(Calendar.MONTH)+
+                                        calendar.get(Calendar.DATE);
+
+                                String SQL_WIN_REPT_BOOK_CUS = "INSERT INTO customer(cid,cname,cphone,csex,vip)"
+                                        +" VALUES('"+cid+"','"+cname+"','"+cphone+"','"+csex+"','"+vip+"')";
+
+                                connector.update(SQL_WIN_REPT_BOOK_CUS);
+
+                                String SQL_WINREPT_BOOK_INSERT = "INSERT INTO book(rid,cid,bemployee,indate)"+
+                                        " VALUES ('"+str_item_rid+"','"+cid+"','"+eid+"','"+inDate+"')";
+
+                                connector.update(SQL_WINREPT_BOOK_INSERT);
+
+                                String SQL_WIN_RECP_SET_ROOM_STATE = "UPDATE room SET state = '1' WHERE "+
+                                        "rid = '"+str_item_rid+"'";
+
+                                connector.update(SQL_WIN_RECP_SET_ROOM_STATE);
+
+                                
+
+
+
+                                win_recp_book.close();
+
+                                Notification notification_success = new Notification("预订成功");
+                                notification_success.setDelayMsec(2000);
+                                notification_success.show(Page.getCurrent());
+
+                            }
+                        });
+
+                        layout_win_recp_book.addComponent(label_win_recp_book);
+                        layout_win_recp_book.addComponent(label_win_recp_type);
+                        layout_win_recp_book.addComponent(label_win_recp_price);
+                        layout_win_recp_book.addComponent(tx_win_recp_name);
+                        layout_win_recp_book.addComponent(tx_win_recp_cid);
+                        layout_win_recp_book.addComponent(og_win_recp_sex);
+                        layout_win_recp_book.addComponent(tx_win_recp_phone);
+                        layout_win_recp_book.addComponent(df_win_recp_indate);
+                        layout_win_recp_book.addComponent(btn_win_recp_admit);
+
+                        win_recp_book.setContent(layout_win_recp_book);
+
+                        UI.getCurrent().addWindow(win_recp_book);
+
+                    }
+                };
+
+                tb_book.addItemClickListener(itemClickListener_book);
+
+
+
+                Table tb_book_cancel = new Table("取消预订");
+                tb_book_cancel.setSizeFull();
+                tb_book_cancel.setHeight(100.0f,Unit.PERCENTAGE);
+
+                tb_book_cancel.addContainerProperty("房间号",String.class,null);
+                tb_book_cancel.addContainerProperty("房间类型",String.class,null);
+                tb_book_cancel.addContainerProperty("预订人",String.class,null);
+
+
+                try{
+                    String SQL_QUERY_BOOK_INFO_CANCEL = "SELECT rid,type,cname FROM room NATURAL JOIN "
+                            +"book NATURAL JOIN customer WHERE state = '1'";
+                    ResultSet rs_query_book_info_cancel = connector.query(SQL_QUERY_BOOK_INFO_CANCEL);
+                    String str_rid = "";
+                    String str_cname = "";
+                    String str_type = "";
+
+                    for(int i = 1; rs_query_book_info_cancel.next();i++){
+                        str_rid = rs_query_book_info_cancel.getString("rid");
+                        str_type = rs_query_book_info_cancel.getString("type");
+                        str_cname = rs_query_book_info_cancel.getString("cname");
+
+                        switch (str_type){
+                            case "0":
+                                str_type = "单人间";
+                                break;
+                            case "1":
+                                str_type = "标准间";
+                                break;
+                            case "2":
+                                str_type = "豪华间";
+                                break;
+                            case "3":
+                                str_type = "商务间";
+                                break;
+                        }
+
+
+                        tb_book_cancel.addItem(new Object[]{str_rid,str_type,str_cname},new Integer(i));
+
+
+                    }
+                }catch (SQLException e){
+                    e.printStackTrace();
+                }
+
+
+
+                layout_book.addComponent(tb_book);
+                layout_book.addComponent(tb_book_cancel);
+
+                win_book.setContent(layout_book);
+
+                UI.getCurrent().addWindow(win_book);
+            }
+        });
         btn_bookroom.setSizeFull();
 
         final Button btn_checkin = new Button("办理入住", new Button.ClickListener() {
@@ -816,7 +1058,7 @@ public class PanelCreator {
                 ItemClickEvent.ItemClickListener itemClickListener = new ItemClickEvent.ItemClickListener() {
                     @Override
                     public void itemClick(ItemClickEvent itemClickEvent) {
-                        Window win_checkin_confirm = new Window("确认入住");
+                        final Window win_checkin_confirm = new Window("确认入住");
 
                         VerticalLayout layout_checkin_confirm = new VerticalLayout();
 
@@ -850,6 +1092,8 @@ public class PanelCreator {
 
                                 Notification notification_ok = new Notification("已办理入住");
                                 notification_ok.show(Page.getCurrent());
+
+                                win_checkin_confirm.close();
 
 
 
@@ -922,7 +1166,14 @@ public class PanelCreator {
         });
         btn_checkin.setSizeFull();
 
-        Button btn_checkout = new Button("办理退房");
+
+
+        Button btn_checkout = new Button("办理退房", new Button.ClickListener() {
+            @Override
+            public void buttonClick(Button.ClickEvent clickEvent) {
+
+            }
+        });
         btn_checkout.setSizeFull();
 
 
