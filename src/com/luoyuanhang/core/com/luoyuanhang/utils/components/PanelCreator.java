@@ -1558,19 +1558,18 @@ public class PanelCreator {
                 tb_manager_employee_info.addContainerProperty("手机号",String.class,null);
                 tb_manager_employee_info.addContainerProperty("职位", String.class, null);
                 tb_manager_employee_info.addContainerProperty("工资", String.class, null);
-                tb_manager_employee_info.addContainerProperty("状态",String.class,null);
 
 
                 ItemClickEvent.ItemClickListener itemClickListener_remove_employee =
                         new ItemClickEvent.ItemClickListener() {
                             @Override
                             public void itemClick(ItemClickEvent itemClickEvent) {
-                                String str_eid = itemClickEvent.getItem().getItemProperty("员工号").toString();
+                                final String str_eid = itemClickEvent.getItem().getItemProperty("员工号").toString();
                                 String str_ename = itemClickEvent.getItem().getItemProperty("姓名").toString();
                                 String str_role = itemClickEvent.getItem().getItemProperty("职位").toString();
                                 String str_salary = itemClickEvent.getItem().getItemProperty("工资").toString();
 
-                                Window win_remove_confirm = new Window("开除员工");
+                                final Window win_remove_confirm = new Window("开除员工");
                                 win_remove_confirm.setImmediate(true);
 
                                 VerticalLayout layout_remove_confirm = new VerticalLayout();
@@ -1585,6 +1584,14 @@ public class PanelCreator {
                                 Button btn_remove_admit = new Button("确认", new Button.ClickListener() {
                                     @Override
                                     public void buttonClick(Button.ClickEvent clickEvent) {
+                                        String SQL_REMOVE_EMPLOYEE = "UPDATE employee SET isexist = 1" +
+                                                " WHERE eid = '" +str_eid+"'";
+                                        connector.update(SQL_REMOVE_EMPLOYEE);
+
+                                        Notification notification_remove = new Notification("已开除！");
+                                        notification_remove.show(Page.getCurrent());
+
+                                        win_remove_confirm.close();
 
                                     }
                                 });
@@ -1597,7 +1604,9 @@ public class PanelCreator {
 
 
 
+                                win_remove_confirm.setContent(layout_remove_confirm);
 
+                                UI.getCurrent().addWindow(win_remove_confirm);
 
                             }
                         };
@@ -1605,7 +1614,7 @@ public class PanelCreator {
                 tb_manager_employee_info.addItemClickListener(itemClickListener_remove_employee);
 
                 try{
-                    String SQL_QUERY_ALL_EMPLOYEE_INFO = "SELECT * FROM employee";
+                    String SQL_QUERY_ALL_EMPLOYEE_INFO = "SELECT * FROM employee WHERE isexist = 0";
                     ResultSet rs_query_all_employee_info = connector.query(SQL_QUERY_ALL_EMPLOYEE_INFO);
 
                     for(int i = 1; rs_query_all_employee_info.next(); i++){
@@ -1615,7 +1624,6 @@ public class PanelCreator {
                         String str_ephone = rs_query_all_employee_info.getString("ephone");
                         String str_role = rs_query_all_employee_info.getString("role");
                         int int_salary = rs_query_all_employee_info.getInt("salary");
-                        String str_isexist = rs_query_all_employee_info.getString("isexist");
 
 
                         switch (str_sex){
@@ -1639,19 +1647,11 @@ public class PanelCreator {
                                 break;
                         }
 
-                        switch (str_isexist){
-                            case "0":
-                                str_isexist = "在职";
-                                break;
-                            case "1":
-                                str_isexist = "离职";
-                                break;
-                        }
 
 
 
                         tb_manager_employee_info.addItem(new Object[]{str_eid,str_ename,str_sex,
-                                str_ephone,str_role,""+int_salary,str_isexist},new Integer(i));
+                                str_ephone,str_role,""+int_salary},new Integer(i));
                     }
                 }catch (SQLException e){
                     e.printStackTrace();
