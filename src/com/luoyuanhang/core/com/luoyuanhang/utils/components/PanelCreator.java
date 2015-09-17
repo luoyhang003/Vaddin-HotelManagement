@@ -1171,6 +1171,128 @@ public class PanelCreator {
         Button btn_checkout = new Button("办理退房", new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent clickEvent) {
+                final Window win_checkout = new Window("办理退房");
+                win_checkout.setSizeFull();
+                win_checkout.setImmediate(true);
+
+                final VerticalLayout layout_win_checkout = new VerticalLayout();
+                layout_win_checkout.setImmediate(true);
+                layout_win_checkout.setSizeFull();
+
+                Table tb_win_checkin = new Table();
+                tb_win_checkin.setSizeFull();
+                tb_win_checkin.setImmediate(true);
+
+                tb_win_checkin.addContainerProperty("房间号",String.class,null);
+                tb_win_checkin.addContainerProperty("入住时间",Timestamp.class,null);
+                tb_win_checkin.addContainerProperty("入住人",String.class,null);
+                tb_win_checkin.addContainerProperty("房费",Integer.class,null);
+
+
+                try{
+                    String SQL_CHECKOUT_QUERY_ALL_ROOM = "SELECT rid,idate,cname,price,cid FROM room"+
+                            " NATURAL JOIN checkin NATURAL JOIN customer WHERE state = '2'";
+                    ResultSet rs_checkout_all_room = connector.query(SQL_CHECKOUT_QUERY_ALL_ROOM);
+                    for(int i = 1; rs_checkout_all_room.next();i++){
+                        String str_rid = rs_checkout_all_room.getString("rid");
+                        Timestamp ts_idate = rs_checkout_all_room.getTimestamp("idate");
+                        String str_cname = rs_checkout_all_room.getString("cname");
+                        int int_price = rs_checkout_all_room.getInt("price");
+
+                        tb_win_checkin.addItem(new Object[]{str_rid,ts_idate,str_cname,int_price},
+                                new Integer(i));
+                    }
+                }catch(SQLException e){
+                    e.printStackTrace();
+                }
+
+                final ItemClickEvent.ItemClickListener itemClickListener_checkout =
+                        new ItemClickEvent.ItemClickListener() {
+                            @Override
+                            public void itemClick(ItemClickEvent itemClickEvent) {
+                                final Window win_checkout_confirm = new Window("退房确认");
+                                win_checkout_confirm.setImmediate(true);
+
+                                VerticalLayout layout_win_checkout_confirm = new VerticalLayout();
+//                                layout_win_checkout_confirm.setSizeFull();
+                                layout_win_checkout_confirm.setImmediate(true);
+                                layout_win_checkout_confirm.setMargin(true);
+
+                                final String str_rid = itemClickEvent.getItem().getItemProperty("房间号").toString();
+                                String str_cname = itemClickEvent.getItem().getItemProperty("入住人").toString();
+                                String int_fee = itemClickEvent.getItem().getItemProperty("房费").toString();
+
+                                Label label_rid = new Label("房间号： "+str_rid);
+                                Label label_cname = new Label("入住人： "+str_cname);
+                                label_cname.setSizeFull();
+                                Label label_fee = new Label("房费： "+int_fee);
+
+                                Button btn_win_checkout_confirm = new Button("确认退房", new Button.ClickListener() {
+                                    @Override
+                                    public void buttonClick(Button.ClickEvent clickEvent) {
+                                        String SQL_QUERY_CHECKINFO ="SELECT cid,price FROM room"+
+                                                " NATURAL JOIN checkin NATURAL JOIN customer"+
+                                                " WHERE state = '2' AND rid = '"+str_rid+"'";
+
+                                        String str_cid_conf = "";
+                                        int str_price = 0;
+
+                                        try {
+                                            ResultSet rs_query_checkininfo = connector.query(SQL_QUERY_CHECKINFO);
+
+                                            if (rs_query_checkininfo.next()) {
+                                                str_cid_conf = rs_query_checkininfo.getString("cid");
+                                                str_price = rs_query_checkininfo.getInt("price");
+                                            }
+                                        }catch (SQLException e){
+                                            e.printStackTrace();
+                                        }
+
+                                        String SQL_INSERT_CHECKOUT_INFO = "INSERT INTO " +
+                                                "checkout(rid,cid,oemployee,fee) VALUES("+
+                                                str_rid+"','"+str_cid_conf+"','"+eid+"','"+str_price+"')";
+                                        connector.update(SQL_INSERT_CHECKOUT_INFO);
+
+                                        String SQL_UPDATE_CHECKOUT_STATE = "UPDATE room SET state = '0' WHERE "
+                                                +"rid = '"+str_rid+"'";
+                                        connector.update(SQL_UPDATE_CHECKOUT_STATE);
+
+                                        Notification notification_checkout_succ = new Notification("退房成功");
+                                        notification_checkout_succ.show(Page.getCurrent());
+
+                                        win_checkout_confirm.close();
+
+                                    }
+                                });
+
+
+                                layout_win_checkout_confirm.addComponent(label_rid);
+                                layout_win_checkout_confirm.addComponent(label_cname);
+                                layout_win_checkout_confirm.addComponent(label_fee);
+                                layout_win_checkout_confirm.addComponent(btn_win_checkout_confirm);
+
+
+
+                                win_checkout_confirm.setContent(layout_win_checkout_confirm);
+
+                                UI.getCurrent().addWindow(win_checkout_confirm);
+
+
+
+                            }
+                        };
+
+                tb_win_checkin.addItemClickListener(itemClickListener_checkout);
+
+
+
+
+                layout_win_checkout.addComponent(tb_win_checkin);
+
+                win_checkout.setContent(layout_win_checkout);
+
+                UI.getCurrent().addWindow(win_checkout);
+
 
             }
         });
